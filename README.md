@@ -37,7 +37,7 @@ sudo apt-get install \
 ### Checking your shared-lib
 In linux you can check for already installed shared library by executing this command
 ```shell
-dpkg-query -l | grep libuv-dev
+dpkg-query -l | grep libuv-evloop-dev
 dpkg-query -l | grep libwslay-dev
 ```
 Find your dependencies location
