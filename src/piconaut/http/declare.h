@@ -8,12 +8,6 @@
 PICONAUT_INNER_NAMESPACE(http)
 
 class Config;
-class HandlerBase;
-class MiddlewareManager;
-class Request;
-class Response;
-using MiddlewareManagerPtr = std::shared_ptr<MiddlewareManager>;
-using HandlerBasePtr = std::shared_ptr<HandlerBase>;
 using ConfigPtr = std::shared_ptr<Config>;
 
 enum class HttpVersionMode {

@@ -1,6 +1,8 @@
 #pragma once
 
-#pragma once
+// #ifndef H2O_USE_LIBUV
+// #define H2O_USE_LIBUV 0
+// #endif
 
 #if __cplusplus >= 201703L
 #define __PCN_CPP17 1
@@ -47,3 +49,4 @@
 #define PICONAUT_END_NAMESPACE }
 
 #define PICONAUT_INNER_END_NAMESPACE }}
+

@@ -1,37 +1,40 @@
 #pragma once
 
-#include <h2o.h>
 
-#include <functional>
+#include <arpa/inet.h>
+#include <h2o.h>
+#include <h2o/socket.h>
+#include <netinet/in.h>
 #include <openssl/ssl.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include <atomic>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
+#include "piconaut/handlers/handler_base.h"
 #include "piconaut/http/config.h"
 #include "piconaut/http/declare.h"
-
-// #include "piconaut/http/middleware_manager.h"
 #include "piconaut/macro.h"
+#include "piconaut/middleware/middleware_manager.h"
 
 PICONAUT_INNER_NAMESPACE(http)
 namespace impl {
-
-void SignalHandler(int signal);
 
 class H2OServerImpl {
  private:
   h2o_hostconf_t* h2o_hostconf_;
   h2o_accept_ctx_t h2o_accept_context_;
   h2o_globalconf_t h2o_config_;
-  h2o_context_t h2o_context_;
+  std::vector<h2o_context_t> h2o_contexts_;
   h2o_compress_args_t h2o_compress_args_;
   h2o_access_log_filehandle_t* log_handle_;
-  uv_loop_t uv_loop_;
   std::vector<std::shared_ptr<HandlerBase>> handlers_;
   MiddlewareManagerPtr middlewares_;
   ConfigPtr server_config_;
@@ -40,27 +43,32 @@ class H2OServerImpl {
   int port_;
   uint16_t worker_number_;
   bool is_ssl_;
-  uv_tcp_t uv_tcp_;
-  std::shared_ptr<std::function<void(uv_stream_t*, int)>> uv_conn_callback_;
+  // std::shared_ptr<std::function<void(uv_stream_t*, int)>> uv_conn_callback_;
 
-  int CreateListener(void) {
-    struct sockaddr_in addr;
-    int r;
-
-    uv_tcp_init(h2o_context_.loop, &uv_tcp_);
-    uv_tcp_.data = new std::shared_ptr<std::function<void(uv_stream_t*, int)>>(
-        uv_conn_callback_);
-    uv_ip4_addr("127.0.0.1", 7890, &addr);
-
-    r = uv_listen((uv_stream_t*)&uv_tcp_, 128, OnNewConnection);
-    if (r) {
-      std::cerr << "Listen error: " << uv_strerror(r) << std::endl;
-      uv_close((uv_handle_t*)&uv_tcp_, NULL);
-    } else {
-      std::cout << "Listening on " << host_ << ":" << port_ << std::endl;
+  // Function to handle connections
+  static void OnAccept(h2o_socket_t* sock, const char* err) {
+    if (err != nullptr) {
+      h2o_socket_close(sock);
+      return;
     }
+    h2o_socket_read_start(sock, [](h2o_socket_t* sock, const char* err) {
+      if (err != nullptr) {
+        h2o_socket_close(sock);
+        return;
+      }
+      h2o_req_t* req = static_cast<h2o_req_t*>(h2o_mem_alloc(sizeof(*req)));
+      h2o_accept_ctx_t* ctx = static_cast<h2o_accept_ctx_t*>(sock->data);
+      h2o_accept(ctx, sock);
+    });
+  }
 
-    return r;
+  // Thread function to run the event loop
+  static void* RunLoop(void* arg) {
+    h2o_context_t* ctx = static_cast<h2o_context_t*>(arg);
+    h2o_evloop_t* loop = ctx->loop;
+    while (h2o_evloop_run(loop, INT32_MAX) == 0)
+      ;
+    return nullptr;
   }
 
   void ConfigureCors(const Config& config) {
@@ -130,7 +138,7 @@ class H2OServerImpl {
     }
   }
 
-  void ConfigureXssSecurity(const Config& config){
+  void ConfigureXssSecurity(const Config& config) {
     // Enable XSS protection
     if (config.XssProtection()) {
       h2o_iovec_t header_name = h2o_iovec_init(H2O_STRLIT("x-xss-protection"));
@@ -144,8 +152,8 @@ class H2OServerImpl {
     }
   }
 
-  void ConfigureCsrfSecurity(const Config& config){
-     // Enable CSRF protection
+  void ConfigureCsrfSecurity(const Config& config) {
+    // Enable CSRF protection
     if (config.CsrfProtection()) {
       // middlewares_.AddMiddleware(std::make_shared<CsrfMiddleware>());
     }
@@ -166,42 +174,14 @@ class H2OServerImpl {
     h2o_hostconf_ = h2o_config_register_host(
         &h2o_config_, h2o_iovec_init(this->host_.c_str(), this->host_.size()),
         this->port_);
-
-    // Redirect the h2o log to the Piconaut log handler
-    // So we can redirect to NvLog
-    // auto log_callback = [](const char* log_line, size_t log_line_len) {
-    //   std::cout.write(log_line, log_line_len);
-    //   std::cout << std::endl;
-    // };
-
-    // create_custom_logger(&hostconf->fallback_path, log_callback);
-
-    uv_conn_callback_ =
-        std::make_shared<std::function<void(uv_stream_t*, int)>>(
-            [this](uv_stream_t* listener, int status) {
-              uv_tcp_t conn;
-              h2o_socket_t* sock;
-
-              if (status != 0)
-                return;
-
-              uv_tcp_init(listener->loop, &conn);
-
-              if (uv_accept(listener, (uv_stream_t*)&conn) != 0) {
-                uv_close((uv_handle_t*)&conn, (uv_close_cb)free);
-                return;
-              }
-
-              sock =
-                  h2o_uv_socket_create((uv_stream_t*)&conn, (uv_close_cb)free);
-              h2o_accept(&h2o_accept_context_, sock);
-            });
   }
 
   ~H2OServerImpl() {
-    h2o_context_dispose(&h2o_context_);
+    // Cleanup
+    for (auto& ctx : h2o_contexts_) {
+      h2o_context_dispose(&ctx);
+    }
     h2o_config_dispose(&h2o_config_);
-    uv_loop_close(&uv_loop_);
   }
 
   void Configure(const Config& config) {
@@ -232,37 +212,47 @@ class H2OServerImpl {
   }
 
   void Start() {
-    signal(SIGPIPE, SIG_IGN);
-    signal(SIGINT, SignalHandler);
-    signal(SIGTERM, SignalHandler);
+    server_running_ = true;
 
-    h2o_access_log_filehandle_t* logfh = h2o_access_log_open_handle(
-        "/dev/stdout", NULL, H2O_LOGCONF_ESCAPE_APACHE);
+    // Initialize contexts and run them in separate threads
+    h2o_contexts_.resize(worker_number_);
+    pthread_t threads[worker_number_];
+    for (size_t i = 0; i < worker_number_; ++i) {
+      h2o_evloop_t* loop = h2o_evloop_create();
+      h2o_context_init(&h2o_contexts_[i], loop, &h2o_config_);
 
-    uv_loop_init(&uv_loop_);
-    h2o_context_init(&h2o_context_, &uv_loop_, &h2o_config_);
+      // Set up the accept context for each loop
+      h2o_accept_context_.ctx = &h2o_contexts_[i];
+      h2o_accept_context_.hosts = h2o_config_.hosts;
 
-    uv_loop_init(&uv_loop_);
-
-    h2o_accept_context_.ctx = &h2o_context_;
-    h2o_accept_context_.hosts = h2o_config_.hosts;
-
-    if (CreateListener() != 0) {
-      std::cerr << "failed to listen to 127.0.0.1:7890:%s\n";
+      pthread_create(&threads[i], nullptr, RunLoop, &h2o_contexts_[i]);
     }
 
-    uv_run((uv_loop_t*)&h2o_context_.loop, UV_RUN_DEFAULT);
-  }
+    // Create and bind the listening socket
+    int listen_fd = socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port_);
+    addr.sin_addr.s_addr = INADDR_ANY;
+    bind(listen_fd, (struct sockaddr*)&addr, sizeof(addr));
+    listen(listen_fd, SOMAXCONN);
 
-  static void OnNewConnection(uv_stream_t* server, int status) {
-    // Retrieve the lambda from the data field and call it
-    auto callback = *reinterpret_cast<
-        std::shared_ptr<std::function<void(uv_stream_t*, int)>>*>(server->data);
-    (*callback)(server, status);
+    // Accept connections and assign to worker threads
+    for (size_t i = 0; i < worker_number_; ++i) {
+      h2o_socket_t* sock = h2o_evloop_socket_create(
+          h2o_contexts_[i].loop, listen_fd, H2O_SOCKET_FLAG_DONT_READ);
+      sock->data = &h2o_accept_context_;
+      h2o_socket_read_start(sock, OnAccept);
+    }
+
+    // Wait for all threads to finish
+    for (size_t i = 0; i < worker_number_; ++i) {
+      pthread_join(threads[i], nullptr);
+    }
   }
 
   void Stop() {
-    // send signal
+    server_running_ = false;
   }
 };
 }  // namespace impl

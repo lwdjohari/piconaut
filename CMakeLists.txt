@@ -3,8 +3,8 @@ project(piconaut CXX)
 
 message( STATUS "Piconout REST FRAMEWORK v1")
 message( STATUS "-----------------------------")
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-
+# set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 # Main server development options
 
 #  feature
@@ -20,6 +20,9 @@ message(STATUS "Core: ON")
 if(PCN_FEATURE_NVLOG)
   message(STATUS "NvLog: ${PCN_FEATURE_NVLOG}")
 endif()
+
+option(H2O_USE_LIBUV OFF)
+set(H2O_USE_LIBUV OFF)
 
 
 
@@ -106,11 +109,13 @@ endif()
 find_package(Threads REQUIRED)
 
 # Include custom FindH2O module
-find_package(Wslay REQUIRED)
-if(NOT WSLAY_FOUND)
-    message(FATAL_ERROR "wslay library not found")
-endif()
-find_package(H2O REQUIRED)
+# find_package(Wslay REQUIRED)
+# if(NOT WSLAY_FOUND)
+#     message(FATAL_ERROR "wslay library not found")
+# endif()
+
+
+find_package(H2O_EVLOOP REQUIRED)
 
 if (NOT nvcore_FOUND)
     add_subdirectory(deps/nvcore build-nvcore)
@@ -140,18 +145,23 @@ target_link_libraries(${PROJECT_NAME}
     PUBLIC
         nvcore
     PRIVATE
-        ${H2O_LIBRARIES}
+        ${H2O_EVLOOP_LIBRARIES}
+        #${H2O_LIBRARIES}
     )
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+target_compile_definitions(${PROJECT_NAME} PUBLIC "H2O_USE_LIBUV=0")
+
 target_compile_features(${PROJECT_NAME} PUBLIC ${CXX_FEATURE})
 target_include_directories(${PROJECT_NAME}
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/
-    PRIVATE
-        ${H2O_INCLUDE_DIRS}
+    
+        # ${H2O_INCLUDE_DIRS}
+        ${H2O_EVLOOP_INCLUDE_DIRS}
+
 )
 
-
+message(STATUS "H2O-EVLOOP:\n${H2O_EVLOOP_LIBRARIES}\n${H2O_EVLOOP_INCLUDE_DIRS}")
 
 add_library(${PROJECT_NAME}::piconaut ALIAS ${PROJECT_NAME} )
 
