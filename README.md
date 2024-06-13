@@ -16,9 +16,9 @@ Piconaut use h2o proven http1.1/http2 webserver as the underlying http server.
 - C++14/C++17 compiler
 
 ## Shared Dependencies
-- Lib H2O Http Server >= v2.5
+- Lib H2O Http Server (evloop) >= v2.5
 - OpenSSL >= v1.1
-- Lib UV
+- Lib UV (use for capture cross platform signal)
 - Lib Wslay
 - Zlib
 
@@ -26,7 +26,7 @@ Note: Debian or Ubuntu linux based
 ```shell
 sudo apt-get update && \
 sudo apt-get install \
-    libh2o-dev \
+    libh2o-evloop-dev \
     openssl \
     libssl-dev \
     libuv1-dev \
