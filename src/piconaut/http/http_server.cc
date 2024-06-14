@@ -115,6 +115,7 @@ void MultiThreadedH2OServer::Start() {
 }
 
 void MultiThreadedH2OServer::Stop() {
+  std::cout << "Server stopping..";
   if (queues_)
     h2o_multithread_destroy_queue(queues_);
   for (auto c : contexts_) {

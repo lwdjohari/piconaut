@@ -19,6 +19,11 @@ H2OServer::H2OServer(const std::string& host, int port)
 
 H2OServer::~H2OServer() {
   Stop();
+  std::cout << "Server stopping..";
+
+  h2o_socket_close(listeners_);
+  h2o_context_dispose(&contexts_);
+  h2o_config_dispose(&config_);
 }
 
 void H2OServer::RegisterHandler(
@@ -106,9 +111,7 @@ void H2OServer::Start() {
 
 
 void H2OServer::Stop() {
-  h2o_socket_close(listeners_);
-  h2o_context_dispose(&contexts_);
-  h2o_config_dispose(&config_);
+  
 }
 
 void H2OServer::RunEventLoop() {

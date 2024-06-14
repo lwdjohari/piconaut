@@ -34,7 +34,7 @@ find_library(H2O_EVLOOP_LIBRARY
 
 # Find other required packages
 find_package(PkgConfig REQUIRED)
-# pkg_check_modules(LIBUV REQUIRED libuv)
+pkg_check_modules(LIBUV REQUIRED libuv)
 find_package(OpenSSL REQUIRED)
 find_package(ZLIB REQUIRED)
 
