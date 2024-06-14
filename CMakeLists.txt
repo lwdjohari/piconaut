@@ -114,13 +114,21 @@ find_package(Threads REQUIRED)
 #     message(FATAL_ERROR "wslay library not found")
 # endif()
 
-
+message(STATUS  "LibH2O: ON")
 find_package(H2O_EVLOOP REQUIRED)
 
 if (NOT nvcore_FOUND)
+    message(STATUS  "NvCore: ON")
     add_subdirectory(deps/nvcore build-nvcore)
 endif()
 
+#rapidjson
+message(STATUS  "Rapidjson: ON")
+set(RAPIDJSON_BUILD_DOC  OFF)
+set(RAPIDJSON_BUILD_EXAMPLES  OFF)
+set(RAPIDJSON_BUILD_TESTS  OFF)
+set(RAPIDJSON_BUILD_THIRDPARTY_GTEST OFF)
+add_subdirectory(deps/rapidjson build-rapidjson)
 
 # nvlog
 if(PCN_FEATURE_NVLOG)
@@ -155,9 +163,9 @@ target_compile_features(${PROJECT_NAME} PUBLIC ${CXX_FEATURE})
 target_include_directories(${PROJECT_NAME}
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/
-    
-        # ${H2O_INCLUDE_DIRS}
-        ${H2O_EVLOOP_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/deps/rapidjson/include
+    # ${H2O_INCLUDE_DIRS}
+    ${H2O_EVLOOP_INCLUDE_DIRS}
 
 )
 
