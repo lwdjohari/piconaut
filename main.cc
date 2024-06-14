@@ -7,14 +7,6 @@ using namespace piconaut;
 std::shared_ptr<http::H2OServer> g_server_;
 std::shared_ptr<sys::SignalHandler> g_signal_;
 
-class MyHandler : public handlers::HandlerBase {
- public:
-  void Handle(const http::Request& req,
-              const http::Response& res) const override {
-    res.SendJson("{\"msg\":\"Hello World from piconaut!\"}", 200);
-    std::cout << "Helloworld sent" << std::endl;
-  }
-};
 
 void CaptureSignalDefault(sys::SignalHandler* handler, sys::SignalType signum) {
   switch (signum) {
@@ -30,6 +22,22 @@ void CaptureSignalDefault(sys::SignalHandler* handler, sys::SignalType signum) {
   }
 }
 
+class HelloWorldHandler : public handlers::HandlerBase {
+ public:
+  void Handle(const http::Request& req,
+              const http::Response& res) const override {
+
+    formats::json::Value json;
+    json["msg"] = "Hello world";
+    json["server"] = "Piconaut Framework";
+    json["version"] = "v0.2.1";
+  
+    res.SendJson(json, 200);
+    std::cout << "Helloworld sent" << std::endl;
+  }
+};
+
+
 int main() {
   const int num_threads = 1;
   const int port = 9066;
@@ -43,9 +51,9 @@ int main() {
     g_server_ = std::make_shared<http::H2OServer>(host, port);
 
     std::shared_ptr<handlers::HandlerBase> handler1 =
-        std::make_shared<MyHandler>();
+        std::make_shared<HelloWorldHandler>();
     std::shared_ptr<handlers::HandlerBase> handler2 =
-        std::make_shared<MyHandler>();
+        std::make_shared<HelloWorldHandler>();
 
     // Register handlers for different paths
     g_server_->RegisterHandler("/", handler1);       // Handle root path

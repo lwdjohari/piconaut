@@ -30,13 +30,22 @@ void Response::Send(const std::string& body, int status_code) const {
   }
 }
 
-void Response::SendJson(const std::string& json, int status_code) const {
+void Response::SendJson(const formats::json::Value& json, int status_code) const {
   try {
     Status(status_code);
-    h2o_add_header(&req_->pool, &req_->res.headers, H2O_TOKEN_CONTENT_TYPE,
-                   NULL, H2O_STRLIT("application/json"));
+    h2o_add_header(&req_->pool, &req_->res.headers, H2O_TOKEN_CONTENT_TYPE, NULL, H2O_STRLIT("application/json"));
     req_->res.reason = "OK";
-    h2o_send_inline(req_, json.c_str(), json.size());
+
+    // Serialize the JSON to a byte array
+    std::vector<uint8_t> byte_array = json.SerializeToBytes();
+
+    // Prepare the buffer
+    h2o_iovec_t body;
+    body.base = reinterpret_cast<char*>(byte_array.data());
+    body.len = byte_array.size();
+
+    // Send the response
+    h2o_send_inline(req_, body.base, body.len);
   } catch (const std::exception& e) {
     Status(H2O_STATUS_ERROR_503);
     h2o_send_error_503(req_, "internal server error", e.what(), 0);
