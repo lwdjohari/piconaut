@@ -13,12 +13,12 @@ class Request {
  public:
     explicit Request(h2o_req_t* req);
 
-    std::string get_path() const;
-    std::string get_method() const;
-    std::unordered_map<std::string, std::string> get_headers() const;
-    std::string get_header(const std::string& name) const;
-    std::string get_body() const;
-    std::string get_query_param(const std::string& name) const;
+    std::string GetPath() const;
+    std::string Method() const;
+    std::unordered_map<std::string, std::string> Headers() const;
+    std::string GetHeader(const std::string& name) const;
+    std::string GetBody() const;
+    std::string GetQueryString(const std::string& name) const;
 
  private:
     h2o_req_t* req_;

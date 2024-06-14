@@ -11,15 +11,15 @@ Request::Request(h2o_req_t* req) : req_(req) {
   }
 }
 
-std::string Request::get_path() const {
+std::string Request::GetPath() const {
   return std::string(req_->path_normalized.base, req_->path_normalized.len);
 }
 
-std::string Request::get_method() const {
+std::string Request::Method() const {
   return std::string(req_->method.base, req_->method.len);
 }
 
-std::unordered_map<std::string, std::string> Request::get_headers() const {
+std::unordered_map<std::string, std::string> Request::Headers() const {
   std::unordered_map<std::string, std::string> headers;
   for (size_t i = 0; i < req_->headers.size; ++i) {
     const h2o_header_t& header = req_->headers.entries[i];
@@ -29,7 +29,7 @@ std::unordered_map<std::string, std::string> Request::get_headers() const {
   return headers;
 }
 
-std::string Request::get_header(const std::string& name) const {
+std::string Request::GetHeader(const std::string& name) const {
   ssize_t header_index =
       h2o_find_header_by_str(&req_->headers, name.c_str(), name.size(), -1);
   if (header_index != -1) {
@@ -39,11 +39,11 @@ std::string Request::get_header(const std::string& name) const {
   return "";
 }
 
-std::string Request::get_body() const {
+std::string Request::GetBody() const {
   return std::string(req_->entity.base, req_->entity.len);
 }
 
-std::string Request::get_query_param(const std::string& name) const {
+std::string Request::GetQueryString(const std::string& name) const {
   if (req_->query_at == SIZE_MAX) {
     return "";
   }

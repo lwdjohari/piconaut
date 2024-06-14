@@ -9,15 +9,15 @@ CsrfMiddleware::CsrfMiddleware() {
 
 void CsrfMiddleware::handle(http::Request& req, http::Response& res,
                             std::function<void()> next) {
-  if (req.get_method() == "POST") {
-    std::string token = req.get_header("X-CSRF-Token");
+  if (req.Method() == "POST") {
+    std::string token = req.GetHeader("X-CSRF-Token");
     if (!validate_token(token)) {
-      res.set_status(403);
-      res.send("Forbidden: CSRF token invalid");
+      res.Status(403);
+      res.Send("Forbidden: CSRF token invalid");
       return;
     }
   }
-  res.set_header("X-CSRF-Token", csrf_token_);
+  res.AddHeader("X-CSRF-Token", csrf_token_);
   next();
 }
 
