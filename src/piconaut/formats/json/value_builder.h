@@ -1,4 +1,4 @@
-#pragma onnce
+#pragma once
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
