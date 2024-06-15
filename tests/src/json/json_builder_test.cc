@@ -6,6 +6,7 @@
 
 using namespace piconaut;
 TEST_CASE("[JsonBuilder] Single Level Test", "[JsonBuilder]") {
+  auto answer = "{\"key1\":\"value1\",\"key2\":\"value2\",\"key3\":\"value3\"}";
   formats::json::ValueBuilder json;
   json["key1"] = "value1";
   json["key2"] = "value2";
@@ -15,13 +16,12 @@ TEST_CASE("[JsonBuilder] Single Level Test", "[JsonBuilder]") {
   auto str_json = val.ToString();
 
   std::cout << "Json:\n" << str_json << std::endl;
-  REQUIRE(true == true);
+  REQUIRE(answer == str_json);
 }
 
 TEST_CASE("[JsonBuilder] Multi Level Test", "[JsonBuilder]") {
-  auto answer =
-      "{\"key0\":\"value0\",\"object\":{\"key1\":\"value1\",\"key2\":"
-      "\"value2\",\"inner\":{\"status\":1}},\"other\":true}";
+  auto answer = "{\"key0\":\"value0\",\"object\":{\"key1\":\"value1\",\"key2\":"
+                "\"value2\",\"inner\":{\"status\":1}},\"other\":true}";
   formats::json::ValueBuilder json;
   json["key0"] = "value0";
 
