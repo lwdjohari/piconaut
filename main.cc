@@ -26,12 +26,14 @@ class HelloWorldHandler : public handlers::HandlerBase {
  public:
   void Handle(const http::Request& req,
               const http::Response& res) const override {
-    formats::json::Value json;
-    json["msg"] = "Hello world";
-    json["server"] = "Piconaut Framework";
-    json["version"] = "v0.2.1";
+    formats::json::ValueBuilder json;
+    
+    json["server"].CreateJsonObject(); 
+    json["server"]["name"] = "Piconaut Framework";
+    json["server"]["version"] = "v0.2.1";
+    json["status"] = 200;
 
-    res.SendJson(json, 200);
+    res.SendJson(json.SerializeToBytes(), 200);
     std::cout << "Helloworld sent" << std::endl;
   }
 };
