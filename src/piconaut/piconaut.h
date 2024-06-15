@@ -1,3 +1,4 @@
+#include "piconaut/formats/json/value_builder.h"
 #include "piconaut/formats/json/value.h"
 #include "piconaut/sys/signal_handler.h"
 #include "piconaut/http/http_server.h"

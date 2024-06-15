@@ -186,10 +186,10 @@ target_compile_features(${PROJECT_NAME}-runner PUBLIC ${CXX_FEATURE})
 #     ${CMAKE_CURRENT_SOURCE_DIR}/src/
 # )
 
-# if(PCN_USE_TEST)
-#     message(STATUS "TEST::ADD_UNIT_TEST.")
-#     add_subdirectory(tests/piconout)
-# endif()       
+if(PCN_USE_TEST)
+    message(STATUS "Piconaut Test: ON")
+    add_subdirectory(tests/ build-piconaut-test)
+endif()       
 
 message(STATUS "Piconout LIB Configuration Done!\n")
 set(piconout_FOUND  ON)

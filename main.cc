@@ -7,12 +7,12 @@ using namespace piconaut;
 std::shared_ptr<http::H2OServer> g_server_;
 std::shared_ptr<sys::SignalHandler> g_signal_;
 
-
 void CaptureSignalDefault(sys::SignalHandler* handler, sys::SignalType signum) {
   switch (signum) {
     case sys::SignalType::SIGINT_SIGNAL:
     case sys::SignalType::SIGTERM_SIGNAL:
-      std::cout << "\nServer stopped (" << static_cast<int>(signum) << ")" << std::endl;
+      std::cout << "\nServer stopped (" << static_cast<int>(signum) << ")"
+                << std::endl;
       if (!g_server_)
         return;
       g_server_->Stop();
@@ -26,17 +26,15 @@ class HelloWorldHandler : public handlers::HandlerBase {
  public:
   void Handle(const http::Request& req,
               const http::Response& res) const override {
-
     formats::json::Value json;
     json["msg"] = "Hello world";
     json["server"] = "Piconaut Framework";
     json["version"] = "v0.2.1";
-  
+
     res.SendJson(json, 200);
     std::cout << "Helloworld sent" << std::endl;
   }
 };
-
 
 int main() {
   const int num_threads = 1;
