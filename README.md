@@ -7,6 +7,45 @@ For full fledged Modern Server Framework, please find [NvServ](https://github.co
 > Currently compatibility with C++14 is not yet throughly tested.<br/>
 > Status : WIP, Experimental & Unstable.  
 
+# Features
+- Http1 and Http2 support
+- Byte, String and Json Handler
+- Dynamic parameter routing support
+- Include easy to use json Value & Value builder
+- Include multithreaded Logger 
+
+### Json Builder Example
+
+```cpp
+
+piconaut::formats::json::ValueBuilder json;
+    
+json["server"].CreateJsonObject(); 
+json["server"]["name"] = "Piconaut Framework";
+json["server"]["version"] = "v0.2.1";
+json["status"] = 200;
+
+// For fast and uglify json output
+// auto json_buffer = json.SerializeToBytes();
+auto json_buffer = json.SerializePrettyToBytes();
+std::cout << json_buffer.ToString() << std::endl;
+
+```
+
+Output
+
+```json
+
+{
+  "server": {
+    "name": "Piconaut Framework",
+    "version": "v0.2.1"
+  },
+  "status": 200
+}
+
+```
+
 # Development & Dependencies
 
 Piconaut use h2o proven http1.1/http2 webserver as the underlying http server.
