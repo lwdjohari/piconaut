@@ -13,6 +13,7 @@ For full fledged Modern Server Framework, please find [NvServ](https://github.co
 - Dynamic parameter routing support
 - Include easy to use json Value & Value builder (Piconaut abstracting RapidJSON as the json engine)
 - Include multithreaded Logger (NvLog)
+- Middleware support
 
 ### Json Builder Example
 
