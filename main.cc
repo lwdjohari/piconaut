@@ -28,6 +28,8 @@ class HelloWorldHandler : public handlers::HandlerBase {
               const http::Response& res) const override {
     formats::json::ValueBuilder json;
     
+    std::cout << "Path: " << req.GetPath() << std::endl;
+
     json["server"].CreateJsonObject(); 
     json["server"]["name"] = "Piconaut Framework";
     json["server"]["version"] = "v0.2.1";
@@ -56,8 +58,8 @@ int main() {
         std::make_shared<HelloWorldHandler>();
 
     // Register handlers for different paths
-    g_server_->RegisterHandler("/", handler1);       // Handle root path
-    g_server_->RegisterHandler("/hello", handler2);  // Handle another path
+    g_server_->RegisterGlobalHandler( handler1);       // Handle root path
+    // g_server_->RegisterHandler("/hello", handler2);  // Handle another path
     g_server_->Start();
     // server.Wait();
     // The server will run indefinitely until stopped

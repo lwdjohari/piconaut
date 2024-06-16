@@ -4,17 +4,22 @@
 // cppcheck-suppress unknownMacro
 PICONAUT_INNER_NAMESPACE(http)
 
-H2OServer::H2OServer(const std::string& host, int port)
-                : host_(host), port_(port) {
+H2OServer::H2OServer(const std::string& host, int port,
+                     const std::string& server_name)
+                : host_(host), port_(port), server_name_(server_name) {
   memset(&config_, 0, sizeof(config_));
   h2o_config_init(&config_);
 
   hostconf_ = h2o_config_register_host(
-      &config_, h2o_iovec_init(host.c_str(), host.size()), port);
+      &config_, h2o_iovec_init(host_.c_str(), host_.size()), port_);
 
   if (hostconf_ == nullptr) {
     throw std::runtime_error("Failed to register host configuration");
   }
+
+  if (!server_name.empty())
+    config_.server_name =
+        h2o_iovec_init(server_name_.c_str(), server_name_.size());
 }
 
 H2OServer::~H2OServer() {
@@ -36,6 +41,17 @@ void H2OServer::RegisterHandler(
     throw std::runtime_error("Error create handler for path:" + path);
   handlers_.push_back(handler);
   std::cout << "Registered handler for path: " << path << std::endl;
+}
+
+void H2OServer::RegisterGlobalHandler(
+    std::shared_ptr<handlers::HandlerBase> handler) {
+  auto pathconf = h2o_config_register_path(hostconf_, "", 0);
+
+  auto h_handler = handlers::MakePiconautHandler(pathconf, handler);
+  if (!h_handler)
+    throw std::runtime_error("Error create handler for global path capture");
+  handlers_.push_back(handler);
+  std::cout << "Registered handler for global path capture " << std::endl;
 }
 
 void H2OServer::AcceptConnection(h2o_socket_t* listener, const char* err) {
@@ -108,11 +124,7 @@ void H2OServer::Start() {
   RunEventLoop();
 }
 
-
-
-void H2OServer::Stop() {
-  
-}
+void H2OServer::Stop() {}
 
 void H2OServer::RunEventLoop() {
   while (h2o_evloop_run(contexts_.loop, INT32_MAX) == 0)

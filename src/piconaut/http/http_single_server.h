@@ -11,16 +11,22 @@
 #include "piconaut/http/config.h"
 #include "piconaut/http/declare.h"
 #include "piconaut/macro.h"
-// #include "piconaut/http/impl/h2o_impl.h"
+#include "piconaut/routers/router.h"
+#include "piconaut/handlers/global_dispatcher_handler.h"
 
 PICONAUT_INNER_NAMESPACE(http)
 
 class H2OServer {
  public:
-  H2OServer(const std::string& host, int port);
+  H2OServer(const std::string& host, int port,
+            const std::string& server_name = "piconaut/0.2.1[h2o/2.2.5]");
   ~H2OServer();
+  void SetConfig(const Config& config);
+  const Config& GetConfig() const;
+  bool SetSSL();
+   void RegisterGlobalHandler(std::shared_ptr<handlers::HandlerBase> handler);
   void RegisterHandler(const std::string& path,
-                        std::shared_ptr<handlers::HandlerBase> handler);
+                       std::shared_ptr<handlers::HandlerBase> handler);
   void Start();
   void Stop();
 
@@ -37,5 +43,6 @@ class H2OServer {
   std::vector<std::shared_ptr<handlers::HandlerBase>> handlers_;
   h2o_hostconf_t* hostconf_;
   h2o_accept_ctx_t accept_ctx_;
+  std::string server_name_;
 };
 PICONAUT_INNER_END_NAMESPACE
