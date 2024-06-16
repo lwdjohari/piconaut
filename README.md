@@ -8,11 +8,11 @@ For full fledged Modern Server Framework, please find [NvServ](https://github.co
 > Status : WIP, Experimental & Unstable.  
 
 # Features
-- Http1 and Http2 support
-- Byte, String and Json Handler
+- Http1 and Http2 support (LibH2O Http Server)
+- Byte, String and Json Handler 
 - Dynamic parameter routing support
-- Include easy to use json Value & Value builder
-- Include multithreaded Logger 
+- Include easy to use json Value & Value builder (Piconaut abstracting rapidjson as the json engine)
+- Include multithreaded Logger (NvLog)
 
 ### Json Builder Example
 
