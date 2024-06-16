@@ -10,7 +10,7 @@ For full fledged Modern Server Framework, please find [NvServ](https://github.co
 # Features
 - HTTP/1.1 and HTTP/2 protocols support (LibH2O Http Server)
 - Byte, String and Json Handler 
-- Dynamic parameter routing support
+- Dynamic parameter routing support (RFC-6570)
 - Include easy to use json Value & Value builder (Piconaut abstracting RapidJSON as the json engine)
 - Include multithreaded Logger (NvLog)
 - Middleware support
