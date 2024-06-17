@@ -100,7 +100,17 @@ endif()
 
 This will ensure CMake configuration for H2o found libwslay.so correctly.
 
+## Deployment
 
+Coming soon
+```
+TL;DR;
+- Install the shared dependency library
+- Build as Release
+- Copy the executable & run
+- For current state, recommend to put behind reverse proxy
+- Non Linux: help with pull request, really appreciate for those helps.
+```
 
 ## Contributions
 
