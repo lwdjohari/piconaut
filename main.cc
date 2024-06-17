@@ -24,17 +24,26 @@ void CaptureSignalDefault(sys::SignalHandler* handler, sys::SignalType signum) {
 
 class HelloWorldHandler : public handlers::HandlerBase {
  public:
-  void Handle(const http::Request& req,
-              const http::Response& res) const override {
+  void HandleRequest(const http::Request& req, const http::Response& res,
+                     const std::unordered_map<std::string, std::string>& params)
+      const override {
     formats::json::ValueBuilder json;
-    
+
     std::cout << "Path: " << req.GetPath() << std::endl;
 
-    json["server"].CreateJsonObject(); 
+    json["server"].CreateJsonObject();
     json["server"]["name"] = "Piconaut Framework";
     json["server"]["version"] = "v0.2.1";
     json["status"] = 200;
 
+    if(params.size()!=0){
+      json["params"].CreateJsonObject();
+    }
+    for (auto &p : params)
+    {
+      json["params"][p.first] = p.second;
+    }
+    
     res.SendJson(json.SerializeToBytes(), 200);
     std::cout << "Helloworld sent" << std::endl;
   }
@@ -56,10 +65,14 @@ int main() {
         std::make_shared<HelloWorldHandler>();
     std::shared_ptr<handlers::HandlerBase> handler2 =
         std::make_shared<HelloWorldHandler>();
+        std::shared_ptr<handlers::HandlerBase> handler3 =
+        std::make_shared<HelloWorldHandler>();
 
     // Register handlers for different paths
-    g_server_->RegisterGlobalHandler( handler1);       // Handle root path
-    // g_server_->RegisterHandler("/hello", handler2);  // Handle another path
+    g_server_->RegisterHandler("/hello", handler1);  // Handle another path
+    g_server_->RegisterHandler("/hello/{id}", handler2);  // Handle another path
+    g_server_->RegisterHandler("/hello/{id}/{detail}", handler3);  // Handle another path
+    
     g_server_->Start();
     // server.Wait();
     // The server will run indefinitely until stopped
