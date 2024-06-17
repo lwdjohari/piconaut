@@ -1,5 +1,6 @@
 # Piconaut Microframework
-Lightweight modern REST/Web micro-framework for C++ 14 &amp; 17.
+Lightweight modern REST/Web micro-framework for C++ 14 &amp; 17.<br/>
+Power of C++, easy as python.
 
 <img src="piconaut.png" width="300"/>
 
