@@ -1,6 +1,8 @@
 # Piconaut Microframework
 Lightweight modern REST/Web micro-framework for C++ 14 &amp; 17.
 
+<img src="piconaut.png" width="300"/>
+
 For full fledged Modern Server Framework, please find [NvServ](https://github.com/lwdjohari/nvserv).
 
 > [!WARNING]
