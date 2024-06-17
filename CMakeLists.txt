@@ -8,8 +8,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 # Main server development options
 
 #  feature
-option(PCN_FEATURE_NVLOG "Use Piconout postgres datalayer" ON)
-
 # Network
 option(PCN_FEATURE_ENVOY "Integrate Envoy Dataplane Library" OFF)
 
@@ -17,35 +15,20 @@ option(PCN_FEATURE_ENVOY "Integrate Envoy Dataplane Library" OFF)
 message(STATUS "Piconout FEATURES.")
 message(STATUS "Core: ON")
 
-if(PCN_FEATURE_NVLOG)
-  message(STATUS "NvLog: ${PCN_FEATURE_NVLOG}")
-endif()
+message(STATUS "NvLog: ON")
 
 option(H2O_USE_LIBUV OFF)
 set(H2O_USE_LIBUV OFF)
-
-
 
 message(STATUS "")
 
 message(STATUS "Piconout LIB DIR:${CMAKE_CURRENT_SOURCE_DIR}")
 
-if(NOT PCN_CXX_VERSION)
-    set(PCN_CXX_VERSION 17)
-endif()
-option(PCN_CXX_STANDARD_REQUIRED "CXX Required" ON)
-option(PCN_CXX_EXTENSIONS "CXX Extensions" ON)
 
 include(ProjectCXX)
 set(ISROOT FALSE)
 NV_DETECT_IS_ROOT_PROJECT(ISROOT)
 message(STATUS "Piconout Root Project: ${ISROOT} ${PCN_CXX_VERSION}")
-
-NV_PROPOGATE_CXX_OPTIONS(${PCN_CXX_VERSION} ${PCN_CXX_STANDARD_REQUIRED} ${PCN_CXX_EXTENSIONS})
-
-set(CXX_FEATURE "")
-NV_GET_CXX_STD_FEATURE(${PCN_CXX_VERSION} CXX_FEATURE)
-message(STATUS "CXX Feature: ${CXX_FEATURE}")
 
 
 option(PCN_BUILD_DOC "Build documentation" OFF)
@@ -55,14 +38,23 @@ option(PCN_USE_TEST ON)
 option(PCN_BUILD_EXAMPLE ON)
 
 if(ISROOT)
+  if(NOT PCN_CXX_VERSION)
+    set(PCN_CXX_VERSION 17)
+  endif()
+    option(PCN_CXX_STANDARD_REQUIRED "CXX Required" ON)
+    option(PCN_CXX_EXTENSIONS "CXX Extensions" ON)
+  NV_PROPOGATE_CXX_OPTIONS(${PCN_CXX_VERSION} ${PCN_CXX_STANDARD_REQUIRED} ${PCN_CXX_EXTENSIONS})
   set(PCN_USE_CATCH ON)
   set(PCN_USE_TEST ON)
   set(PCN_BUILD_EXAMPLE ON)
-  set(PCN_SERVER_GRPC ON)
-  set(PCN_SERVER_REST ON)
-  set(PCN_FEATURE_NVLOG ON)
-
+  set(CXX_FEATURE "")
+else()
+    set(NVSERV_CXX_VERSION ${CMAKE_CXX_STANDARD})
 endif()
+
+
+NV_GET_CXX_STD_FEATURE(${PCN_CXX_VERSION} CXX_FEATURE)
+message(STATUS "CXX Feature: ${CXX_FEATURE}")
 
 # Add ASAN
 if(PCN_SANITIZE_ADDRESS)
@@ -121,6 +113,8 @@ if (NOT nvcore_FOUND)
     message(STATUS  "NvCore: ON")
     add_subdirectory(deps/nvcore build-nvcore)
 endif()
+
+add_subdirectory(deps/nvlog build-nvlog)
 
 #rapidjson
 message(STATUS  "Rapidjson: ON")
