@@ -5,7 +5,7 @@
 PICONAUT_INNER_NAMESPACE(routers)
 Router::Router() : root_(std::make_unique<RouterNode>()) {}
 
-void Router::AddRoute(const std::string& path, Route::HandlerFn handler) {
+void Router::AddRoute(const size_t& key, const std::string& path, Route::HandlerFn handler) {
   std::lock_guard<std::mutex> lock(mutex_); 
   if (!IsValidRoute(path)) {
     throw std::invalid_argument("Invalid route pattern: " + path);
@@ -46,6 +46,7 @@ void Router::AddRoute(const std::string& path, Route::HandlerFn handler) {
     }
   }
 
+  node->key = size_t(key);
   node->handler = std::move(handler);
 }
 
@@ -56,7 +57,7 @@ void Router::PrintRouterTree() const {
     root_->PrintNode("");
   }
 
-Route::HandlerFn Router::MatchRoute(
+RouterMatchResult Router::MatchRoute(
     const std::string& path,
     std::unordered_map<std::string, std::string>& params) const {
   std::vector<std::string> endpoint_parts =
@@ -73,16 +74,16 @@ Route::HandlerFn Router::MatchRoute(
           param_it->second->type == NodeType::kParameter) {
         node = param_it->second.get();
         if (!std::regex_match(part, node->param_regex)) {
-          return nullptr;  // Part does not match parameter pattern
+          return RouterMatchResult(nullptr,nullptr);  // Part does not match parameter pattern
         }
         params[node->param_name] = part;
       } else {
-        return nullptr;  // No matching static or dynamic part
+        return RouterMatchResult(nullptr,nullptr);  // No matching static or dynamic part
       }
     }
   }
 
-  return node->handler;
+  return RouterMatchResult(&node->key, &node->handler);
 }
 
 bool Router::IsValidRoute(const std::string& path) const {

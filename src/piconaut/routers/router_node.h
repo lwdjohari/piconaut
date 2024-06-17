@@ -1,11 +1,11 @@
 #pragma once
+#include <iostream>
 #include <memory>
 #include <regex>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <iostream>
 
 #include "piconaut/macro.h"
 #include "piconaut/routers/declare.h"
@@ -20,6 +20,7 @@ struct RouterNode {
   NodeType type = NodeType::kStatic;
   std::string param_name;
   std::regex param_regex;
+  size_t key;
 
   void PrintNode(const std::string& prefix = "") const {
     for (const auto& child : children) {

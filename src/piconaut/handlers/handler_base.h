@@ -13,20 +13,29 @@ PICONAUT_INNER_NAMESPACE(handlers)
 class HandlerBase {
  public:
   virtual ~HandlerBase() = default;
-  virtual void Handle(const http::Request& req,
-                      const http::Response& res) const = 0;
+  virtual void __HandleImpl(const http::Request& req,
+                      const http::Response& res) const {
+    throw std::runtime_error("Unimplemented void Handle on Handler base");
+  };
+
+  virtual void HandleRequest(
+      const http::Request& req, const http::Response& res,
+      const std::unordered_map<std::string, std::string>& params) const = 0;
 
   static int HandlerCallback(h2o_handler_t* self, h2o_req_t* req) {
     if (!self || !req)
       return 1;
 
-    std::cout << "Callback received:" << std::string(req->path_normalized.base, req->path_normalized.len) << std::endl;
-    
+    std::cout << "Callback received:"
+              << std::string(req->path_normalized.base,
+                             req->path_normalized.len)
+              << std::endl;
+
     piconaut_handler_t* pico_handler = (piconaut_handler_t*)self;
     HandlerBase* handler = static_cast<HandlerBase*>(pico_handler->handler);
     http::Request request(req);
     http::Response response(req);
-    handler->Handle(request, response);
+    handler->__HandleImpl(request, response);
     return 0;
   }
 };

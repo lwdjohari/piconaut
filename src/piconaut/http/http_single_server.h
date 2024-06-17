@@ -24,13 +24,14 @@ class H2OServer {
   void SetConfig(const Config& config);
   const Config& GetConfig() const;
   bool SetSSL();
-   void RegisterGlobalHandler(std::shared_ptr<handlers::HandlerBase> handler);
+   
   void RegisterHandler(const std::string& path,
                        std::shared_ptr<handlers::HandlerBase> handler);
   void Start();
   void Stop();
 
  private:
+ void RegisterGlobalHandler(std::shared_ptr<handlers::HandlerBase> handler);
   void RunEventLoop();
   static void AcceptConnection(h2o_socket_t* sock, const char* err);
 
@@ -44,5 +45,6 @@ class H2OServer {
   h2o_hostconf_t* hostconf_;
   h2o_accept_ctx_t accept_ctx_;
   std::string server_name_;
+  std::shared_ptr<handlers::GlobalDispatcherHandler> routers_;
 };
 PICONAUT_INNER_END_NAMESPACE

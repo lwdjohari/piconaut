@@ -13,6 +13,21 @@
 #include "piconaut/utils/string_utils.h"
 
 PICONAUT_INNER_NAMESPACE(routers)
+struct RouterMatchResult {
+  const Route::HandlerFn* executor;
+  const size_t* key;
+
+  RouterMatchResult(const size_t* key,const Route::HandlerFn* fn)
+                  : key(key), executor(fn) {}
+
+  bool IsEmpty() const{
+    if( !executor)
+      return true;
+    
+    return false;
+  }
+};
+
 /// @brief Router class for managing routing endpoint registration and
 /// route-matching. Implementation conform to RFC-6570. This class is
 /// thread-safe and designed for concurrent lock-free MatchRoute executions.
@@ -29,9 +44,10 @@ class Router {
   Router& operator=(Router&&) = delete;
 
   void PrintRouterTree() const;
-  void AddRoute(const std::string& path, Route::HandlerFn handler);
+  void AddRoute(const size_t& key, const std::string& path,
+                Route::HandlerFn handler);
 
-  Route::HandlerFn MatchRoute(
+  RouterMatchResult MatchRoute(
       const std::string& path,
       std::unordered_map<std::string, std::string>& params) const;
 

@@ -6,7 +6,11 @@ PICONAUT_INNER_NAMESPACE(http)
 
 H2OServer::H2OServer(const std::string& host, int port,
                      const std::string& server_name)
-                : host_(host), port_(port), server_name_(server_name) {
+                : host_(host),
+                  port_(port),
+                  server_name_(server_name),
+                  routers_(
+                      std::make_shared<handlers::GlobalDispatcherHandler>()) {
   memset(&config_, 0, sizeof(config_));
   h2o_config_init(&config_);
 
@@ -20,6 +24,8 @@ H2OServer::H2OServer(const std::string& host, int port,
   if (!server_name.empty())
     config_.server_name =
         h2o_iovec_init(server_name_.c_str(), server_name_.size());
+
+  RegisterGlobalHandler(routers_);
 }
 
 H2OServer::~H2OServer() {
@@ -31,17 +37,24 @@ H2OServer::~H2OServer() {
   h2o_config_dispose(&config_);
 }
 
+
 void H2OServer::RegisterHandler(
     const std::string& path, std::shared_ptr<handlers::HandlerBase> handler) {
-  h2o_pathconf_t* pathconf =
-      h2o_config_register_path(hostconf_, path.c_str(), 0);
-
-  auto h_handler = handlers::MakePiconautHandler(pathconf, handler);
-  if (!h_handler)
-    throw std::runtime_error("Error create handler for path:" + path);
-  handlers_.push_back(handler);
+  routers_->RegisterRouteHandler(path,handler);
   std::cout << "Registered handler for path: " << path << std::endl;
 }
+
+// void H2OServer::RegisterHandler(
+//     const std::string& path, std::shared_ptr<handlers::HandlerBase> handler) {
+//   h2o_pathconf_t* pathconf =
+//       h2o_config_register_path(hostconf_, path.c_str(), 0);
+
+//   auto h_handler = handlers::MakePiconautHandler(pathconf, handler);
+//   if (!h_handler)
+//     throw std::runtime_error("Error create handler for path:" + path);
+//   handlers_.push_back(handler);
+//   std::cout << "Registered handler for path: " << path << std::endl;
+// }
 
 void H2OServer::RegisterGlobalHandler(
     std::shared_ptr<handlers::HandlerBase> handler) {
