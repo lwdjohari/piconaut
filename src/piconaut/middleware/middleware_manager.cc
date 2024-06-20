@@ -2,15 +2,15 @@
 
 // cppcheck-suppress unknownMacro
 PICONAUT_INNER_NAMESPACE(middleware)
-void MiddlewareManager::add_middleware(
+void MiddlewareManager::Add(
     std::shared_ptr<MiddlewareBase> middleware) {
   middlewares_.push_back(middleware);
 }
 
-void MiddlewareManager::handle(http::Request& req, http::Response& res) {
+void MiddlewareManager::Handle(http::Request& req, http::Response& res) {
   std::function<void(size_t)> execute = [&](size_t index) {
     if (index < middlewares_.size()) {
-      middlewares_[index]->handle(req, res, [&]() { execute(index + 1); });
+      middlewares_[index]->Handle(req, res, [&]() { execute(index + 1); });
     }
   };
   execute(0);

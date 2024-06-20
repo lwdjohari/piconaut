@@ -116,19 +116,15 @@ endif()
 
 add_subdirectory(deps/nvlog build-nvlog)
 
+
 #rapidjson
 message(STATUS  "Rapidjson: ON")
+set(RAPIDJSON_BUILD_CXX11 ON)
 set(RAPIDJSON_BUILD_DOC  OFF)
 set(RAPIDJSON_BUILD_EXAMPLES  OFF)
 set(RAPIDJSON_BUILD_TESTS  OFF)
 set(RAPIDJSON_BUILD_THIRDPARTY_GTEST OFF)
 add_subdirectory(deps/rapidjson build-rapidjson)
-
-# nvlog
-if(PCN_FEATURE_NVLOG)
-#   add_subdirectory(src/postgres/ build-piconout_postgres)
-endif()
-
 
 # piconout-framework
 # combine all needed linking

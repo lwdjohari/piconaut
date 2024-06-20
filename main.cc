@@ -27,14 +27,25 @@ class HelloWorldHandler : public handlers::HandlerBase {
   void HandleRequest(const http::Request& req, const http::Response& res,
                      const std::unordered_map<std::string, std::string>& params)
       const override {
-    formats::json::ValueBuilder json;
+    
+    auto user_agent = req.GetHeader("user-agent");
+    auto accept_encoding = req.GetHeader("accept-encoding");
+    auto accept_lang = req.GetHeader("accept-language");
+    auto cache_control = req.GetHeader("cache-control");
+    auto pragma = req.GetHeader("pragma");
 
+    formats::json::ValueBuilder json;
     std::cout << "Path: " << req.GetPath() << std::endl;
 
     json["server"].CreateJsonObject();
     json["server"]["name"] = "Piconaut Framework";
     json["server"]["version"] = "v0.2.1";
     json["status"] = 200;
+    json["userAgent"] = user_agent;
+    json["acceptLanguage"] = accept_lang;
+    json["acceptEncoding"] = accept_encoding;
+    json["cacheControl"] = cache_control;
+    json["pragma"] = pragma;
 
     if(params.size()!=0){
       json["params"].CreateJsonObject();
@@ -69,10 +80,12 @@ int main() {
         std::make_shared<HelloWorldHandler>();
 
     // Register handlers for different paths
-    g_server_->RegisterHandler("/hello", handler1);  // Handle another path
-    g_server_->RegisterHandler("/hello/{id}", handler2);  // Handle another path
-    g_server_->RegisterHandler("/hello/{id}/{detail}", handler3);  // Handle another path
-    
+    g_server_->RegisterHandler("/post", handler1); 
+    g_server_->RegisterHandler("/post/{id}", handler2);  
+    g_server_->RegisterHandler("/post/{id}/{slug}", handler3);  
+    g_server_->RegisterHandler("/{year}/{month}", handler3);
+    g_server_->RegisterHandler("/{year}/{month}/post/{id}/{slug}", handler3);
+
     g_server_->Start();
     // server.Wait();
     // The server will run indefinitely until stopped

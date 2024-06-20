@@ -13,7 +13,7 @@ PICONAUT_INNER_NAMESPACE(middleware)
 class MiddlewareBase {
  public:
   virtual ~MiddlewareBase() = default;
-  virtual void handle(http::Request& req, http::Response& res,
+  virtual void Handle(http::Request& req, http::Response& res,
                       std::function<void()> next) = 0;
 };
 

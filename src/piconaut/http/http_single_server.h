@@ -12,6 +12,7 @@
 #include "piconaut/http/declare.h"
 #include "piconaut/macro.h"
 #include "piconaut/routers/router.h"
+#include "piconaut/middleware/middleware_manager.h"
 #include "piconaut/handlers/global_dispatcher_handler.h"
 
 PICONAUT_INNER_NAMESPACE(http)
@@ -24,7 +25,8 @@ class H2OServer {
   void SetConfig(const Config& config);
   const Config& GetConfig() const;
   bool SetSSL();
-   
+  
+  void RegisterMiddleware(std::shared_ptr<middleware::MiddlewareBase> middleware);
   void RegisterHandler(const std::string& path,
                        std::shared_ptr<handlers::HandlerBase> handler);
   void Start();

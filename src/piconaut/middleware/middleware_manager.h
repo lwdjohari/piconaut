@@ -10,8 +10,8 @@ PICONAUT_INNER_NAMESPACE(middleware)
 
 class MiddlewareManager {
  public:
-  void add_middleware(std::shared_ptr<MiddlewareBase> middleware);
-  void handle(http::Request& req, http::Response& res);
+  void Add(std::shared_ptr<MiddlewareBase> middleware);
+  void Handle(http::Request& req, http::Response& res);
 
  private:
   std::vector<std::shared_ptr<MiddlewareBase>> middlewares_;

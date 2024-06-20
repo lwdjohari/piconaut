@@ -10,7 +10,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-
+#include <memory>
 #include "piconaut/macro.h"
 
 PICONAUT_INNER_NAMESPACE(formats)
