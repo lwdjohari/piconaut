@@ -74,7 +74,8 @@ sudo apt-get install \
     libssl-dev \
     libuv1-dev \
     libwslay-dev \
-    zlib1g-dev
+    zlib1g-dev \
+    pkg-config
 ```
 
 ### Checking your shared-lib
