@@ -100,6 +100,9 @@ endif()
 
 find_package(Threads REQUIRED)
 
+set(ABSL_PROPAGATE_CXX_STD ON)
+add_subdirectory(deps/abseil-lts20230125.1 build-abseil)
+
 # Include custom FindH2O module
 # find_package(Wslay REQUIRED)
 # if(NOT WSLAY_FOUND)
